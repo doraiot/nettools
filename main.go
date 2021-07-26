@@ -13,6 +13,5 @@ func main() {
 	// fmt.Println(c[:2])
 	// fmt.Println(c[2:])
 
-	// sendUDP()
-	receiveUDP()
+	pullMessage()
 }
