@@ -131,42 +131,50 @@ const (
 )
 
 type modDataX struct {
-	ib_ch    [4]ibdata
-	v_dcin   uint16
-	v_bat    uint16
-	i_bat    uint16
-	iout_bat uint16
+	IB_ch    [4]ibdata `json:"ibch"`
+	V_dcin   uint16    `json:"v_dcin"`
+	V_bat    uint16    `json:"v_bat"`
+	I_bat    uint16    `json:"i_bat"`
+	Iout_bat uint16    `json:"iout_bat"`
 
-	dcORbat_ch uint16
+	DcORbat_ch uint16 `json:"dcORbat_ch"`
 
-	bat_100          uint16
-	bat_flag         uint16
-	ntc_bat          int16
-	ntc_board        int16
-	temp_board_flag  uint16
-	temp_senser_falg uint16
+	Bat_100          uint16 `json:"bat_100"`
+	Bat_flag         uint16 `json:"bat_flag"`
+	Ntc_bat          int16  `json:"ntc_bat"`
+	Ntc_board        int16  `json:"ntc_board"`
+	Temp_board_flag  uint16 `json:"temp_board_flag"`
+	Temp_senser_falg uint16 `json:"temp_senser_falg"`
 
-	dhcp uint16
+	Dhcp uint16 `json:"dhcp"`
 
-	t_bat_h   int16
-	t_bat_L   int16
-	t_board_h int16
-	t_board_l int16
+	T_bat_h   int16 `json:"t_bat_h"`
+	T_bat_L   int16 `json:"t_bat_L"`
+	T_board_h int16 `json:"t_board_h"`
+	T_board_l int16 `json:"t_board_l"`
 
-	b_shibie   uint16
-	b_guochong uint16
-	b_guofang  uint16
-	b_fuchong  uint16
+	B_shibie   uint16 `json:"b_shibie"`
+	B_guochong uint16 `json:"b_guochong"`
+	B_guofang  uint16 `json:"b_guofang"`
+	B_fuchong  uint16 `json:"b_fuchong"`
 
-	mac  [6]byte
-	name [32]byte
+	mac  [6]byte  `json:"mac"`
+	name [32]byte `json:"name"`
 }
 
 type ibdata struct {
-	ib_i         uint16 //本安输出电流
-	ib_v         uint16 //本安输出电压
-	protect_flag byte   //保护状态
-	change_time  byte   //上次更新时间
+	IB_i         uint16 `json:"ib_i"`         //本安输出电流
+	IB_v         uint16 `json:"ib_v"`         //本安输出电压
+	Protect_Flag byte   `json:"protect_flag"` //保护状态
+	Change_Time  byte   `json:"change_time"`  //上次更新时间
+}
+
+type bData struct {
+	IpAddr    string    `json:"ip_addr"`
+	Name      string    `json:"name"`
+	MacAddr   string    `json:"mac_addr"`
+	RawData   *modDataX `json:"raw_data"`
+	CreatedOn string    `json:"created_on"`
 }
 
 func doCrc16(data []byte) []byte {

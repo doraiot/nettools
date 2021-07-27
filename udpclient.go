@@ -52,7 +52,7 @@ func pullMessage() {
 		n, addr, err := pc.ReadFrom(buf[:])
 		checkError(err, "conn.Read")
 		log.Printf("receive from [%v] message length: [%v]\n", addr, n)
-		receiveUDP(buf[:])
+		receiveUDP(addr.String(), buf[:])
 	}
 }
 
