@@ -13,7 +13,7 @@ import (
 var (
 	raAddr   = getEnv("raAddr", "255.255.255.255:5500")
 	laAddr   = getEnv("laAddr", ":6789")
-	internal = getEnv("internal", "60")
+	internal = getEnv("internal", "600")
 )
 
 func getEnv(key, fallback string) string {
@@ -25,7 +25,7 @@ func getEnv(key, fallback string) string {
 func checkError(err error, funcName string) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Fatal error:%s-----in func:%s", err.Error(), funcName)
-		os.Exit(1)
+		// os.Exit(1)
 	}
 }
 func pullMessage() {
