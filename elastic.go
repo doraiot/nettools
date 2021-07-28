@@ -32,20 +32,21 @@ func saveToES(data *bData) {
 		Refresh: "true",
 	}
 	res, err := req.Do(context.Background(), es)
-	checkError(err, "req.Do")
-
-	defer res.Body.Close()
-
-	if res.IsError() {
-		log.Printf("[%s] Error indexing document clientIp=%v", res.Status(), data.IpAddr)
+	if err != nil {
+		checkError(err, "req.Do")
 	} else {
-		// Deserialize the response into a map.
-		var r map[string]interface{}
-		if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
-			fmt.Printf("Error parsing the response body: %s\n", err)
+		defer res.Body.Close()
+		if res.IsError() {
+			log.Printf("[%s] Error indexing document clientIp=%v", res.Status(), data.IpAddr)
 		} else {
-			// Print the response status and indexed document version.
-			fmt.Printf("[%s] %s; version=%d\n", res.Status(), r["result"], int(r["_version"].(float64)))
+			// Deserialize the response into a map.
+			var r map[string]interface{}
+			if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
+				fmt.Printf("Error parsing the response body: %s\n", err)
+			} else {
+				// Print the response status and indexed document version.
+				fmt.Printf("[%s] %s; version=%d\n", res.Status(), r["result"], int(r["_version"].(float64)))
+			}
 		}
 	}
 }
