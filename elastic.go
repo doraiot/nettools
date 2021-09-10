@@ -16,9 +16,13 @@ var (
 )
 
 func init() {
-	esAddr := getEnv("esAddr", "http://main.dorabc.com:9200")
+	esAddr := getEnv("esAddr", "http://xyz.dorabc.com:9200")
+	esUser := getEnv("esUser", "elastic")
+	esPwd := getEnv("esPwd", "dyrs@2021")
 	cfg := elasticsearch.Config{
 		Addresses: []string{esAddr},
+		Username:  esUser,
+		Password:  esPwd,
 	}
 	es, _ = elasticsearch.NewClient(cfg)
 }

@@ -2,12 +2,90 @@ package main
 
 import (
 	"bytes"
+	"encoding/hex"
+	"errors"
 	"fmt"
+	"log"
+	"net"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/fananchong/cstruct-go"
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
+
+var (
+	raAddr   = getEnv("raAddr", "255.255.255.255:5500")
+	laAddr   = getEnv("laAddr", ":6789")
+	internal = getEnv("internal", "600")
+)
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
+}
+func checkError(err error, funcName string) {
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Fatal error:%s-----in func:%s", err.Error(), funcName)
+		// os.Exit(1)
+	}
+}
+func pullMessage() {
+	udpAddr, err := net.ResolveUDPAddr("udp4", raAddr)
+	checkError(err, "net.ResolveUDPAddr")
+
+	// localAddr, err := net.ResolveUDPAddr("udp4", laAddr)
+	// checkError(err, "net.ResolveUDPAddr")
+
+	// conn, err := net.DialUDP("udp", localAddr, udpAddr)
+	// checkError(err, "net.DialUDP")
+	//https://github.com/aler9/howto-udp-broadcast-golang
+	// defer conn.Close()
+	pc, err := net.ListenPacket("udp4", laAddr)
+	checkError(err, "net.ListenPacket")
+
+	go func(pc net.PacketConn, udpAddr *net.UDPAddr) {
+		keepSendUDP(pc, udpAddr)
+	}(pc, udpAddr)
+
+	var buf [512]byte
+
+	for {
+		n, addr, err := pc.ReadFrom(buf[:])
+		checkError(err, "conn.Read")
+		log.Printf("receive from [%v] message length: [%v]\n", addr, n)
+		receiveUDP(addr.String(), buf[:])
+	}
+}
+
+func keepSendUDP(pc net.PacketConn, udpAddr *net.UDPAddr) (bool, error) {
+	quit := make(chan struct{})
+	internals, _ := strconv.Atoi(internal)
+	ticker := time.NewTicker(time.Duration(internals) * time.Second)
+	// Keep trying until we're timed out or got a result or got an error
+	for {
+		sendUDP(pc, udpAddr)
+		select {
+		// Got a timeout! fail with a timeout error
+		case <-quit:
+			ticker.Stop()
+			return false, errors.New("Stop")
+		// Got a tick, we should check on doSomething()
+		case <-ticker.C:
+			continue
+		}
+	}
+}
+
+func sendUDP(pc net.PacketConn, udpAddr *net.UDPAddr) {
+	s := "EF1299780000000200"
+	data, _ := hex.DecodeString(s)
+	_, err := pc.WriteTo(data, udpAddr)
+	checkError(err, "conn.Write")
+}
 
 func receiveUDP(addr string, data []byte) {
 	// s := "050305664A017109000900000000006400000000006400000000006464094D0881010000000064000100204E2F000000000000004100E2FF4100E2FFF40198087206340800000000180A393031B8A8D4CB353030C3D7BFD8D6C6C6F7B5E7D4B400000000000000000000B92E"
