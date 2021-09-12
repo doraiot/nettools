@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"os"
 	"strconv"
 	"time"
 
@@ -16,36 +15,12 @@ import (
 )
 
 var (
-	raAddr   = getEnv("raAddr", "255.255.255.255:5500")
-	laAddr   = getEnv("laAddr", ":6789")
-	internal = getEnv("internal", "600")
+	raAddr = getEnv("raAddr", "255.255.255.255:5500")
 )
 
-func getEnv(key, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	return fallback
-}
-func checkError(err error, funcName string) {
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Fatal error:%s-----in func:%s", err.Error(), funcName)
-		// os.Exit(1)
-	}
-}
-func pullMessage() {
+func pullMessage(pc net.PacketConn) {
 	udpAddr, err := net.ResolveUDPAddr("udp4", raAddr)
 	checkError(err, "net.ResolveUDPAddr")
-
-	// localAddr, err := net.ResolveUDPAddr("udp4", laAddr)
-	// checkError(err, "net.ResolveUDPAddr")
-
-	// conn, err := net.DialUDP("udp", localAddr, udpAddr)
-	// checkError(err, "net.DialUDP")
-	//https://github.com/aler9/howto-udp-broadcast-golang
-	// defer conn.Close()
-	pc, err := net.ListenPacket("udp4", laAddr)
-	checkError(err, "net.ListenPacket")
 
 	go func(pc net.PacketConn, udpAddr *net.UDPAddr) {
 		keepSendUDP(pc, udpAddr)
@@ -67,7 +42,9 @@ func keepSendUDP(pc net.PacketConn, udpAddr *net.UDPAddr) (bool, error) {
 	ticker := time.NewTicker(time.Duration(internals) * time.Second)
 	// Keep trying until we're timed out or got a result or got an error
 	for {
-		sendUDP(pc, udpAddr)
+		s := "EF1299780000000200"
+		data, _ := hex.DecodeString(s)
+		sendUDP(pc, udpAddr, data)
 		select {
 		// Got a timeout! fail with a timeout error
 		case <-quit:
@@ -78,13 +55,6 @@ func keepSendUDP(pc net.PacketConn, udpAddr *net.UDPAddr) (bool, error) {
 			continue
 		}
 	}
-}
-
-func sendUDP(pc net.PacketConn, udpAddr *net.UDPAddr) {
-	s := "EF1299780000000200"
-	data, _ := hex.DecodeString(s)
-	_, err := pc.WriteTo(data, udpAddr)
-	checkError(err, "conn.Write")
 }
 
 func receiveUDP(addr string, data []byte) {

@@ -1,5 +1,16 @@
 package main
 
+import (
+	"fmt"
+	"net"
+	"os"
+)
+
+var (
+	laAddr   = getEnv("laAddr", ":6789")
+	internal = getEnv("internal", "600")
+)
+
 func main() {
 	// s := "EF129978000000"
 	// data, err := hex.DecodeString(s)
@@ -16,4 +27,32 @@ func main() {
 	// data, _ := hex.DecodeString(s)
 	// receiveUDP("192.168.5.220:5500", data)
 	// pullMessage()
+
+	// localAddr, err := net.ResolveUDPAddr("udp4", laAddr)
+	// checkError(err, "net.ResolveUDPAddr")
+
+	// conn, err := net.DialUDP("udp", localAddr, udpAddr)
+	// checkError(err, "net.DialUDP")
+	//https://github.com/aler9/howto-udp-broadcast-golang
+	// defer conn.Close()
+	pc, err := net.ListenPacket("udp4", laAddr)
+	checkError(err, "net.ListenPacket")
+	pullMessage(pc)
+
+	udpAddr, err := net.ResolveUDPAddr("udp4", "192.168.0.23:5500")
+	checkError(err, "net.ResolveUDPAddr")
+	sendMessage(pc, udpAddr, WRITE_NAME, []byte("aabbcc"))
+}
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
+}
+func checkError(err error, funcName string) {
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Fatal error:%s-----in func:%s", err.Error(), funcName)
+		// os.Exit(1)
+	}
 }
