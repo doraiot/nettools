@@ -37,11 +37,12 @@ func main() {
 	// defer conn.Close()
 	pc, err := net.ListenPacket("udp4", laAddr)
 	checkError(err, "net.ListenPacket")
-	pullMessage(pc)
+	// pullMessage(pc)
 
 	udpAddr, err := net.ResolveUDPAddr("udp4", "192.168.0.23:5500")
+	// udpAddr, err := net.ResolveUDPAddr("udp4", "39.104.185.91:5500")
 	checkError(err, "net.ResolveUDPAddr")
-	sendMessage(pc, udpAddr, WRITE_NAME, []byte("aabbcc"))
+	sendMessage(pc, udpAddr, WRITE_NAME, []byte("zhangzs"))
 }
 
 func getEnv(key, fallback string) string {

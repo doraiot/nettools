@@ -8,7 +8,6 @@ import (
 
 func sendMessage(pc net.PacketConn, ipaddr *net.UDPAddr, msgType byte, data []byte) {
 	dataLen := len(data)
-	msgType = WRITE_NAME
 	bufferData := make([]byte, dataLen+6)
 	bufferData[0] = 0x05
 	bufferData[1] = WRITE_struct
@@ -22,7 +21,7 @@ func sendMessage(pc net.PacketConn, ipaddr *net.UDPAddr, msgType byte, data []by
 	bufferData[dataLen+4] = crcData[1]
 	bufferData[dataLen+5] = crcData[0]
 	fmt.Println(hex.EncodeToString(bufferData))
-	sendUDP(pc, ipaddr, data)
+	sendUDP(pc, ipaddr, bufferData)
 }
 
 func sendUDP(pc net.PacketConn, udpAddr *net.UDPAddr, data []byte) {
